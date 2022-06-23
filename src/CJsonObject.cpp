@@ -8,7 +8,7 @@
  * Modify history:
  ******************************************************************************/
 
-#include "CJsonObject.hpp"
+#include "CJsonObject.h"
 
 #ifdef _WIN32
 #define snprintf _snprintf_s
