@@ -24,17 +24,30 @@
 #else
 #include <unordered_map>
 #endif
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "cJSON.h"
-#ifdef __cplusplus
-}
-#endif
 
-
+#include <stdint.h>
 namespace neb
 {
+
+typedef int32_t int32;
+typedef uint32_t uint32;
+typedef int64_t int64;
+typedef uint64_t uint64;
+
+typedef struct cJSON
+{
+    struct cJSON *next, *prev; /* next/prev allow you to walk array/object chains. Alternatively, use GetArraySize/GetArrayItem/GetObjectItem */
+    struct cJSON *child; /* An array or object item will have a child pointer pointing to a chain of the items in the array/object. */
+
+    int type; /* The type of the item, as above. */
+
+    char *valuestring; /* The item's string, if type==cJSON_String */
+    int64 valueint; /* The item's number, if type==cJSON_Number */
+    double valuedouble; /* The item's number, if type==cJSON_Number */
+    int sign;   /* sign of valueint, 1(unsigned), -1(signed) */
+
+    char *string; /* The item's name string, if this item is the child of, or is in the list of subitems of an object. */
+} cJSON;
 
 class CJsonObject
 {
