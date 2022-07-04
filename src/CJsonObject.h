@@ -213,6 +213,11 @@ public:     // method of json array
     bool Replace(int iWhich, double dValue);
     bool ReplaceWithNull(int iWhich);      // replace with a null value
 
+public:
+    const char *Key();
+    int Type();
+    bool Update(CJsonObject &subset);
+
 private:
     CJsonObject(cJSON* pJsonData);
 

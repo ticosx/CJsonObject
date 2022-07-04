@@ -30,6 +30,7 @@
 #define cJSON_String 5
 #define cJSON_Array 6
 #define cJSON_Object 7
+#define cJSON_Empty 8
 
 #define cJSON_IsReference 256
 
@@ -1241,6 +1242,59 @@ CJsonObject::CJsonObject(CJsonObject&& oJsonObject)
 CJsonObject::~CJsonObject()
 {
     Clear();
+}
+
+const char* CJsonObject::Key()
+{
+    if (m_pJsonData)
+        return m_pJsonData->string;
+    if (m_pExternJsonDataRef)
+        return m_pExternJsonDataRef->string;
+    return NULL;
+}
+
+int CJsonObject::Type()
+{
+    if (m_pJsonData)
+        return m_pJsonData->type;
+    if (m_pExternJsonDataRef)
+        return m_pExternJsonDataRef->type;
+    return cJSON_Empty;
+}
+
+bool CJsonObject::Update(CJsonObject &subset)
+{
+    if (Type() != cJSON_Object)
+        return false;
+    if ((subset.Type() != cJSON_Object) && (!subset.Key()))
+        return false;
+    if (subset.Key()) {
+        CJsonObject &item = (*this)[subset.Key()];
+        if (item.IsEmpty()) {
+            return Add(subset.Key(), subset);
+        } else if ((item.Type() != cJSON_Object) || (subset.Type() != cJSON_Object)) {
+            return Replace(subset.Key(), subset);
+        } else {
+            cJSON *pJson = subset.m_pJsonData ? subset.m_pJsonData : subset.m_pExternJsonDataRef;
+            cJSON *s_item = pJson->child;
+            while (s_item) {
+                CJsonObject sItem(s_item);
+                if (!item.Update(sItem))
+                    return false;
+                s_item = s_item->next;
+            }
+        }
+    } else {
+        cJSON *pJson = subset.m_pJsonData ? subset.m_pJsonData : subset.m_pExternJsonDataRef;
+        cJSON *s_item = pJson->child;
+        while (s_item) {
+            CJsonObject sItem(s_item);
+            if (!Update(sItem))
+                return false;
+            s_item = s_item->next;
+        }
+    }
+    return true;
 }
 
 CJsonObject& CJsonObject::operator=(const CJsonObject& oJsonObject)
